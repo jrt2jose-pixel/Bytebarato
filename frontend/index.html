@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+        content="ByteBarato — Rastreo de precios y comparación de smartphones en México. Detecta falsas ofertas con historial de precios." />
+
+  <title>ByteBarato — Rastreador de Precios</title>
+
+  <!-- Fuentes Google (cargadas antes del CSS para evitar FOUT) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+
+  <!-- Hoja de estilos del proyecto -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Chart.js — librería de gráficas (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
+          defer></script>
+
+  <!-- Lógica de la aplicación (defer: se ejecuta tras parsear el HTML) -->
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════════════════════════ -->
+  <header>
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+      <div class="navbar__inner">
+
+        <!-- Logo -->
+        <a href="#inicio" class="navbar__logo" aria-label="ByteBarato — ir al inicio">
+          Byte<span>Barato</span>
+        </a>
+
+        <!-- Navegación -->
+        <ul class="navbar__links">
+          <li><a href="#inicio">Inicio</a></li>
+          <li><a href="#catalogo">Catálogo</a></li>
+          <li><a href="#acerca">Acerca de</a></li>
+        </ul>
+
+      </div>
+    </nav>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════
+       HERO SECTION
+  ══════════════════════════════════════════════════════════ -->
+  <section id="inicio" class="hero" aria-labelledby="hero-titulo">
+
+    <h1 id="hero-titulo" class="hero__titulo">
+      Compra inteligente,<br />paga el precio justo
+    </h1>
+    <p class="hero__subtitulo">
+      Rastreamos precios de smartphones en tiendas mexicanas y detectamos
+      falsas ofertas con historial de precios en tiempo real.
+    </p>
+
+    <!-- Campo de búsqueda + Botón Actualizar -->
+    <div class="hero__controles">
+
+      <div class="buscador">
+        <span class="buscador__icono" aria-hidden="true">🔍</span>
+        <input
+          id="input-busqueda"
+          class="buscador__input"
+          type="search"
+          placeholder="Buscar smartphone..."
+          autocomplete="off"
+          aria-label="Buscar productos en el catálogo"
+        />
+      </div>
+
+      <button
+        id="btn-actualizar"
+        class="btn btn--primario"
+        aria-label="Actualizar catálogo con los últimos precios"
+      >
+        <span id="btn-actualizar-icono" aria-hidden="true">↻</span>
+        <span id="btn-actualizar-texto">Actualizar Catálogo</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       CATÁLOGO DE PRODUCTOS
+  ══════════════════════════════════════════════════════════ -->
+  <main id="catalogo" class="catalogo">
+
+    <div class="catalogo__header">
+      <h2 class="catalogo__titulo">Catálogo de Smartphones</h2>
+      <span id="contador-productos" class="catalogo__contador" aria-live="polite"></span>
+    </div>
+
+    <!--
+      Contenedor del grid.
+      JavaScript inyecta las tarjetas de producto aquí.
+      También renderiza estados de carga, vacío o error dentro de este div.
+    -->
+    <div
+      id="grid-productos"
+      class="grid-productos"
+      role="list"
+      aria-label="Listado de productos"
+    ></div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL DE GRÁFICA DE HISTORIAL
+       Estado inicial: oculto (sin clase "abierto")
+  ══════════════════════════════════════════════════════════ -->
+  <div
+    id="modal-overlay"
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-titulo"
+    aria-hidden="true"
+  >
+    <div class="modal" id="modal-contenido">
+
+      <!-- Encabezado del modal -->
+      <div class="modal__header">
+        <div>
+          <p id="modal-tienda"  class="modal__tienda"></p>
+          <h3 id="modal-titulo" class="modal__titulo"></h3>
+        </div>
+        <button
+          id="btn-cerrar-modal"
+          class="btn btn--ghost modal__cerrar"
+          aria-label="Cerrar ventana de historial de precios"
+        >✕</button>
+      </div>
+
+      <!-- Estadísticas rápidas del producto -->
+      <div class="modal__stats">
+        <div class="stat">
+          <span class="stat__label">Precio actual</span>
+          <span id="stat-actual" class="stat__valor stat__valor--verde"></span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Precio mínimo</span>
+          <span id="stat-min"    class="stat__valor"></span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Precio máximo</span>
+          <span id="stat-max"    class="stat__valor stat__valor--rojo"></span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Registros</span>
+          <span id="stat-total"  class="stat__valor"></span>
+        </div>
+      </div>
+
+      <!-- Canvas de Chart.js para la gráfica de líneas -->
+      <div class="modal__grafica">
+        <canvas id="historialChart" aria-label="Gráfica de historial de precios"></canvas>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       CONTENEDOR DE TOAST (notificaciones flotantes)
+  ══════════════════════════════════════════════════════════ -->
+  <div
+    id="toast-contenedor"
+    class="toast-contenedor"
+    role="status"
+    aria-live="polite"
+    aria-atomic="false"
+  ></div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FOOTER — ACERCA DE
+  ══════════════════════════════════════════════════════════ -->
+  <footer id="acerca" class="footer">
+    <div class="footer__inner">
+
+      <p class="footer__logo">Byte<span>Barato</span></p>
+
+      <p class="footer__desc">
+        Sistema web de rastreo de precios y recomendación de dispositivos
+        tecnológicos enfocado en el mercado mexicano. Detecta fluctuaciones
+        de precio para que siempre pagues lo justo.
+      </p>
+
+      <div class="footer__equipo">
+        <span class="footer__badge">Ángel — Líder / Bot &amp; API</span>
+        <span class="footer__badge">Junior — Backend &amp; SQLite</span>
+        <span class="footer__badge">Antonia — Frontend JS</span>
+      </div>
+
+      <p class="footer__copy">
+        Proyecto académico — Desarrollo de Aplicaciones Web ·
+        DACYTI‑UJAT · 2026
+      </p>
+
+    </div>
+  </footer>
+
+</body>
+</html>

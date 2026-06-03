@@ -1,0 +1,25 @@
+# ─────────────────────────────────────────────────────────────
+# ByteBarato — Dependencias del proyecto
+# Generado: junio 2026 | Python >= 3.11
+#
+# Instalación:
+#   pip install -r requirements.txt
+#
+# Nota: sqlite3 es nativo de Python y no se incluye aquí.
+# ─────────────────────────────────────────────────────────────
+ 
+# Framework web (API REST)
+fastapi==0.136.3
+ 
+# Servidor ASGI — [standard] incluye websockets, watchfiles y httptools
+# requeridos para --reload en desarrollo y mejor rendimiento en producción
+uvicorn[standard]==0.48.0
+ 
+# Evasión de WAF / retos Cloudflare (scraper de Mercado Libre y DDTech)
+cloudscraper==1.2.71
+ 
+# Peticiones HTTP (scraper de Elektra y módulos con requests estándar)
+requests==2.34.2
+ 
+# Parseo de HTML (BeautifulSoup — análisis de catálogos y JSON-LD)
+beautifulsoup4==4.14.3
